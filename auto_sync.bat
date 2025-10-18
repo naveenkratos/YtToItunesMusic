@@ -8,6 +8,23 @@
 set BASEDIR=C:\Softwares\YTmusicConv\YTMusic
 cd /d "%BASEDIR%"
 
+
+set RUNLOGFILE=%BASEDIR%\last_run_date.txt
+
+:: Get today's date in yyyy-mm-dd format
+for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd"') do set TODAYDATE=%%i
+
+
+:: Read last run date (if file exists)
+set "lastRun="
+if exist "%RUNLOGFILE%" for /f "usebackq delims=" %%A in ("%RUNLOGFILE%") do set "lastRun=%%A"
+
+:: Clean up spaces
+set "lastRun=%lastRun: =%"
+
+:: Skip if already ran today
+if "%lastRun%"=="%TODAYDATE%" exit /b
+
 :: --- Your YouTube playlist link ---
 set PLAYLIST=https://youtube.com/playlist?list=PLBVMSiLoYCzbuLpRtyDmEEBbOYV-29hZa
 
@@ -19,10 +36,6 @@ set LOGDIR=%BASEDIR%\logs
 if not exist "%LOGDIR%" mkdir "%LOGDIR%"
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd"') do set LOGDATE=%%i
 set LOGFILE=%LOGDIR%\sync_log_%LOGDATE%.txt
-
-
-:: --- Create logs folder if missing ---
-if not exist "C:\Softwares\YTmusicConv\YTMusic\logs" mkdir "C:\Softwares\YTmusicConv\YTMusic\logs"
 
 
 echo ======================================================== >> "%LOGFILE%"
@@ -76,4 +89,7 @@ echo ===================================================== >> "%LOGFILE%"
 echo [%date% %time%] YouTube to iTunes Sync Complete  >> "%LOGFILE%"
 echo ===================================================== >> "%LOGFILE%"
 
-exit
+:: === Update last run date ===
+echo %TODAYDATE% > "%RUNLOGFILE%"
+
+exit /b
