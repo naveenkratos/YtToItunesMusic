@@ -29,6 +29,6 @@ Steps to follow:
 
 By following above instructions, your youtube playlist will be in sync with your itunes playlist. 
 EveryTime your open your laptop the YT -> iTunes playlist starts syncing. 
-Connect your iphone to laptop, so that your iphone will also be in sync with YT playlist.
+Connect your iphone to laptop, And Sync music so that your iphone will also be in sync with itunes -> YT playlist.
 
 **Note: while Syncing or running scripts if itunes opens by itself dont close it.**
