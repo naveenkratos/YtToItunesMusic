@@ -1,4 +1,4 @@
-**Youtube -> Itunes Playlist:**
+**Youtube to Itunes Playlist:**
 
 Steps to follow:
 
