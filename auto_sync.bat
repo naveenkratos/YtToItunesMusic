@@ -5,11 +5,24 @@
 :: ==========================================
 
 :: --- Base tools directory ---
-set BASEDIR=C:\Softwares\YTmusicConv\YTMusic
+set BASEDIR=%~dp0
 cd /d "%BASEDIR%"
 
+:: Path to config file
+set CONFIG_FILE=%BASEDIR%config.ini
 
-set RUNLOGFILE=%BASEDIR%\last_run_date.txt
+:: Read each line
+for /f "usebackq tokens=1,* delims==" %%A in (`findstr /v "^#" "%CONFIG_FILE%"`) do (
+    set "%%A=%%B"
+)
+
+echo Playlist URL is: %PLAYLIST_URL%
+:: Remove surrounding quotes if any
+set "PLAYLIST_URL=%PLAYLIST_URL:"=%"
+
+echo Playlist URL is: %PLAYLIST_URL%
+
+set RUNLOGFILE=%BASEDIR%last_run_date.txt
 
 :: Get today's date in yyyy-mm-dd format
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd"') do set TODAYDATE=%%i
@@ -25,14 +38,11 @@ set "lastRun=%lastRun: =%"
 :: Skip if already ran today
 if "%lastRun%"=="%TODAYDATE%" exit /b
 
-:: --- Your YouTube playlist link ---
-set PLAYLIST=https://youtube.com/playlist?list=PLBVMSiLoYCzbuLpRtyDmEEBbOYV-29hZa
-
 :: --- Destination iTunes Music folder ---
 set ITUNESMUSIC=C:\Users\%USERNAME%\Music\iTunes\iTunes Media\Automatically Add to iTunes
 
 :: --- Log file (rotates daily) ---
-set LOGDIR=%BASEDIR%\logs
+set LOGDIR=%BASEDIR%logs
 if not exist "%LOGDIR%" mkdir "%LOGDIR%"
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd"') do set LOGDATE=%%i
 set LOGFILE=%LOGDIR%\sync_log_%LOGDATE%.txt
@@ -64,7 +74,7 @@ echo ===================================================== >> "%LOGFILE%"
 echo =====================================================
 echo    Starting YouTube Playlist to iTunes Music Sync
 echo =====================================================
-echo Playlist: %PLAYLIST%
+echo Playlist: %PLAYLIST_URL%
 echo Target Folder: %ITUNESMUSIC%
 echo -----------------------------------------------------
 
@@ -75,10 +85,10 @@ yt-dlp -f "bestaudio[ext=m4a]/bestaudio" -x --audio-format alac --audio-quality 
 --newline ^
 --progress ^
 -o "%ITUNESMUSIC%\%%(title)s.%%(ext)s" ^
-%PLAYLIST%  >> "%LOGFILE%" 2>&1
+"%PLAYLIST_URL%"  >> "%LOGFILE%" 2>&1
 
 :: --- Trigger iTunes refresh + reorder playlist ---
-powershell -ExecutionPolicy Bypass -File "%BASEDIR%\itunes_playlist.ps1" "%PLAYLIST%" >> "%LOGFILE%" 2>&1
+powershell -ExecutionPolicy Bypass -File "%BASEDIR%itunes_playlist.ps1" "%PLAYLIST_URL%" >> "%LOGFILE%" 2>&1
 
 
 echo -----------------------------------------------------
