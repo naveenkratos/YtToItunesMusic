@@ -186,3 +186,14 @@ Write-Host "-----------------------------------------------------"
 Write-Host "iTunes playlist synced successfully: $playlistName"
 Write-Host "Total tracks in playlist $playlistName : $($playlist.Tracks.Count)"
 Write-Host "-----------------------------------------------------"
+
+# === Close iTunes after short delay ===
+Write-Host ""
+Write-Host "Waiting 5 seconds before closing iTunes..."
+Start-Sleep -Seconds 5
+try {
+    $itunes.Quit()
+    Write-Host "iTunes closed successfully."
+} catch {
+    Write-Warning "Failed to close iTunes automatically. You may close it manually."
+}
