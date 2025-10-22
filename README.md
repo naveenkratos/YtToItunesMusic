@@ -1,5 +1,7 @@
 **Sync Youtube to Itunes Playlist for IPHONE OFFLINE SONGS**
 
+**Mandatory: Install itunes from microsoft store.**
+
 Steps to follow:
 
 1. Run setup.bat file. if prompted, provide admin privilage. "Wait fot setup to complete!"
