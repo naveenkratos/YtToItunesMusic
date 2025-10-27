@@ -64,7 +64,11 @@ if "%ERRORLEVEL%"=="0" (
     echo iTunes not running.
 )
 
+echo ===================================================== >> "%LOGFILE%"
+echo [%date% %time%] Updating YTDLP to latest version >> "%LOGFILE%"
+echo ===================================================== >> "%LOGFILE%"
 
+yt-dlp -U >> "%LOGFILE%" 2>&1
 
 echo ===================================================== >> "%LOGFILE%"
 echo [%date% %time%] Starting YouTube to iTunes Sync >> "%LOGFILE%"
