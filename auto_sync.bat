@@ -43,6 +43,11 @@ set ITUNESMUSIC=C:\Users\%USERNAME%\Music\iTunes\iTunes Media\Automatically Add 
 :: --- Log file (rotates daily) ---
 set LOGDIR=%BASEDIR%\logs
 if not exist "%LOGDIR%" mkdir "%LOGDIR%"
+
+:: Delete logs older than 7 days
+forfiles /p "%LOGDIR%" /m *.txt /d -7 /c "cmd /c del @path"
+
+:: Generate daily log filename
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd"') do set LOGDATE=%%i
 set LOGFILE=%LOGDIR%\sync_log_%LOGDATE%.txt
 
