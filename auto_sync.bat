@@ -13,13 +13,6 @@ cd /d "%BASEDIR%"
 :: Path to config file
 set CONFIG_FILE=%BASEDIR%\config.ini
 
-:: Read each line
-for /f "usebackq tokens=1,* delims==" %%A in (`findstr /v "^#" "%CONFIG_FILE%"`) do (
-    set "%%A=%%B"
-)
-
-:: Remove surrounding quotes if any
-set "PLAYLIST_URL=%PLAYLIST_URL:"=%"
 
 set RUNLOGFILE=%BASEDIR%\last_run_date.txt
 
@@ -79,32 +72,36 @@ echo ===================================================== >> "%LOGFILE%"
 echo [%date% %time%] Starting YouTube to iTunes Sync >> "%LOGFILE%"
 echo ===================================================== >> "%LOGFILE%"
 
-echo =====================================================
-echo    Starting YouTube Playlist to iTunes Music Sync
-echo =====================================================
-echo Playlist: %PLAYLIST_URL%
-echo Target Folder: %ITUNESMUSIC%
-echo -----------------------------------------------------
 
-:: --- Download & convert to MP3 directly into iTunes folder ---
-yt-dlp -f "bestaudio[ext=m4a]/bestaudio" -x --audio-format alac --audio-quality 0 ^
---embed-thumbnail --add-metadata ^
---download-archive downloaded.txt ^
---newline ^
---progress ^
--o "%ITUNESMUSIC%\%%(title)s.%%(ext)s" ^
-%PLAYLIST_URL%  >> "%LOGFILE%" 2>&1
+:: Loop youtube playlist url in config files
+for /f "usebackq tokens=1,* delims==" %%A in (`findstr /v "^#" "%CONFIG_FILE%"`) do (
+    
+	echo =====================================================  >> "%LOGFILE%"
+	echo    Starting YouTube Playlist Sync  >> "%LOGFILE%"
+	echo =====================================================  >> "%LOGFILE%"
+	echo Playlist %%A: %%B  >> "%LOGFILE%"
+	echo Target Folder: %ITUNESMUSIC%  >> "%LOGFILE%"
+	echo -----------------------------------------------------  >> "%LOGFILE%"
 
-:: --- Trigger iTunes refresh + reorder playlist ---
-powershell -ExecutionPolicy Bypass -File "%BASEDIR%\itunes_playlist.ps1" "%PLAYLIST_URL%" >> "%LOGFILE%" 2>&1
+	:: --- Download & convert to MP3 directly into iTunes folder ---
+	yt-dlp -f "bestaudio[ext=m4a]/bestaudio" -x --audio-format alac --audio-quality 0 ^
+	--embed-thumbnail --add-metadata ^
+	--download-archive downloaded.txt ^
+	--newline ^
+	--progress ^
+	-o "%ITUNESMUSIC%\%%(title)s.%%(ext)s" ^
+	%%B  >> "%LOGFILE%" 2>&1
+
+	:: --- Trigger iTunes refresh + reorder playlist ---
+	powershell -ExecutionPolicy Bypass -File "%BASEDIR%\itunes_playlist.ps1" %%B >> "%LOGFILE%" 2>&1
 
 
-echo -----------------------------------------------------
-echo   Sync complete! New songs are now in iTunes Music.
-echo -----------------------------------------------------
-
+	echo ----------------------------------------------------- >> "%LOGFILE%"
+	echo   Playlist Sync complete! >> "%LOGFILE%"
+	echo ----------------------------------------------------- >> "%LOGFILE%"
+)
 echo ===================================================== >> "%LOGFILE%"
-echo [%date% %time%] YouTube to iTunes Sync Complete  >> "%LOGFILE%"
+echo [%date% %time%] YouTube to iTunes Sync Complete!  >> "%LOGFILE%"
 echo ===================================================== >> "%LOGFILE%"
 
 :: === Update last run date ===
