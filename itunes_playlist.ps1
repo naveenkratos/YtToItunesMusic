@@ -35,9 +35,10 @@ try {
 }
 
 $playlistName = ($ytInfo.title -replace '[\\/:*?"<>|]', '_')  # sanitize name
-$ytTracks = $ytInfo.entries | ForEach-Object { $_.title }
+$ytTracksUrls = $ytInfo.entries | ForEach-Object { $_.url }
 
-Write-Host "YTPlaylist: $playlistName ($($ytTracks.Count) tracks)"
+
+Write-Host "YTPlaylist: $playlistName ($($ytTracksUrls.Count) tracks)"
 
 # Path to your text file containing YouTube song titles
 $txtFile = Join-Path $scriptDir "downloaded.txt"
@@ -47,7 +48,7 @@ if (Test-Path $txtFile) {
     $expectedCount = (Get-Content $txtFile | Measure-Object -Line).Lines
 }
 else{
-	$expectedCount = $ytTracks.Count
+	$expectedCount = $ytTracksUrls.Count
 }
 
 
@@ -80,49 +81,35 @@ $playlist = $itunes.CreatePlaylist($playlistName)
 
 # --- Cache playlist tracks for faster lookup ---
 $existingTracks = @{}
-foreach ($track in @($playlist.Tracks)) {
-    $key = "$($track.Name)|$($track.Location)"
-    $existingTracks[$key] = $true
-}
 
 # === Build fast lookup hash for iTunes library ===
 Write-Host "Indexing iTunes library for faster matching..."
 $libraryTracks = $itunes.LibraryPlaylist.Tracks
-$libraryHash = @{}
+$libraryCommentHash = @{}
 foreach ($track in @($libraryTracks)) {
-    $cleanName = ($track.Name -replace '\s*\(.*\)$','').ToLower().Trim()
-    if (-not $libraryHash.ContainsKey($cleanName)) {
-        $libraryHash[$cleanName] = @()
+    $cleanComment = ($track.Comment -replace '\s*\(.*\)$','').ToLower().Trim()
+    if (-not $libraryCommentHash.ContainsKey($cleanComment)) {
+        $libraryCommentHash[$cleanComment] = @()
     }
-    $libraryHash[$cleanName] += $track
+    $libraryCommentHash[$cleanComment] += $track
 }
-Write-Host "Library index built ($($libraryHash.Count) unique titles)."
+Write-Host "Library index built ($($libraryCommentHash.Count) unique titles)."
 
 # === Add tracks in the same order as YouTube ===
 
 $added = 0
 $skipped = 0
 
-foreach ($title in $ytTracks) {
-    $searchTitle = ($title -replace '\s*\(.*\)$','').ToLower().Trim()
+foreach ($ytTrackUrl in $ytTracksUrls) {
+    $searchUrl = ($ytTrackUrl -replace '\s*\(.*\)$','').ToLower().Trim()
     $foundTracks = $null
 
     # Exact match
-    if ($libraryHash.ContainsKey($searchTitle)) {
-        $foundTracks = $libraryHash[$searchTitle]
+    if ($libraryCommentHash.ContainsKey($searchUrl)) {
+		Write-Host "Exact Match Track - $searchUrl "
+        $foundTracks = $libraryCommentHash[$searchUrl]
     }
-    else {
-        # Fuzzy: partial contains match — build a safe wildcard pattern
-		$escaped = Escape-LikeWildcards($searchTitle)
-        $partialMatches = $libraryHash.Keys | Where-Object { $_ -like "*$escaped*" }
 
-        if ($partialMatches) {
-            $foundTracks = @()
-            foreach ($match in $partialMatches) {
-                $foundTracks += $libraryHash[$match]
-            }
-        }
-    }
 
     if (-not $foundTracks) {
         Write-Host "Not found in iTunes: $title"
@@ -130,7 +117,7 @@ foreach ($title in $ytTracks) {
     }
 
     foreach ($track in $foundTracks) {
-        $key = "$($track.Name)|$($track.Location)"
+        $key = "$($track.Comment)|$($track.Location)"
         if (-not $existingTracks.ContainsKey($key)) {
             try {
                 $null = $playlist.AddTrack($track)
@@ -153,31 +140,31 @@ Write-Host "Total Tracks in Library: $($libraryTracks.Count)"
 Write-Host "New tracks added: $added"
 
 
-# Find library songs missing in playlist
+# Find YTplaylist songs missing in itunesplaylist
 
 $playlistTracks = $playlist.Tracks
-$libraryNames = $libraryTracks | ForEach-Object { $_.Name.Trim() }
-$playlistNames = $playlistTracks | ForEach-Object { $_.Name.Trim() }
-$missingInPlaylist = $libraryNames | Where-Object { $_ -notin $playlistNames }
+$ytPlaylistTrackUrls = $ytTracksUrls | ForEach-Object { $_.Trim() }
+$playlistComments = $playlistTracks | ForEach-Object { $_.Comment.Trim() }
+$missingInPlaylist = $ytPlaylistTrackUrls | Where-Object { $_ -notin $playlistComments }
 Write-Host "Missing Tracks: $($missingInPlaylist.Count)" 
 Write-Host "-----------------------------------------------------"
 if ($missingInPlaylist) {
 	Write-Host "`n=== Adding $($missingInPlaylist.Count) Missing Tracks in Playlist '$playlistName' ===" 
 	#Add missing songs to the playlist
-	foreach ($missingTrackName in $missingInPlaylist) {
+	foreach ($missingTrackUrl in $missingInPlaylist) {
 		try {
-			$trackToAdd = $libraryTracks | Where-Object { $_.Name.Trim().ToLower() -eq $missingTrackName.ToLower() }
+			$trackToAdd = $libraryTracks | Where-Object { $_.Comment.Trim().ToLower() -eq $missingTrackUrl.ToLower() }
 			if ($trackToAdd) {
 				$null = $playlist.AddTrack($trackToAdd)
 				$added++
-				Write-Host "Added: $missingTrackName" 
+				Write-Host "Added: $missingTrackUrl" 
 				$added++
 			} else {
-				Write-Host "Not found in library: $missingTrackName" 
+				Write-Host "Not found in library: $missingTrackUrl" 
 			}
 		}
 		catch {
-			Write-Warning "Failed to add '$($missingTrackName)': $($_.Exception.Message)"
+			Write-Warning "Failed to add '$($missingTrackUrl)': $($_.Exception.Message)"
 		}
 	}
 }
@@ -197,3 +184,4 @@ try {
 } catch {
     Write-Warning "Failed to close iTunes automatically. You may close it manually."
 }
+Start-Sleep -Seconds 5
