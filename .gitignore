@@ -6,9 +6,9 @@
 /logs/
 
 # Ignore text files
-*.txt
-*.log
-*.ini
+/*.txt
+/*.log
+/*.ini
 
 # OS / system files
 Thumbs.db
