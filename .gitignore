@@ -8,6 +8,7 @@
 # Ignore text files
 *.txt
 *.log
+*.ini
 
 # OS / system files
 Thumbs.db
