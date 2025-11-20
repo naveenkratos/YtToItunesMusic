@@ -174,4 +174,22 @@ Write-Host "`nTask '$taskName' created successfully for $currentUser!"
 
 Write-Host "`nSetup complete. All required tools are installed and ready." -ForegroundColor Green
 
+Write-Host @"
+Follow Below Steps, or Check Readme.md file,
+1. Open Task Scheduler,
+2. In Left side pane, click on Task Schedule Library,
+3. Right Click 'YouTube Music To iTunes Auto Sync' Task and click properties
+4. In Trigger tab, Click Edit,
+	Change "At Log On" to "On Workstation unlock"
+	Select "on workstation unlock"
+	Tick specific user
+	Tick delay task and select seconds and then edit it to 45 seconds
+	Tick enabled
+5. In condition Tab, Click Edit,
+	UnTick all
+	Tick "Start Task only when computer is on AC Power" and
+	Tick "start only if network connection is available" and
+	Tick "Any available network"
+"@
+
 exit
