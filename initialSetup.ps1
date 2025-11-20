@@ -77,5 +77,101 @@ if ($needFF) {
     Write-Host "FFmpeg executables already exist."
 }
 
+<#
+Creates a user-specific Task Scheduler task only if it doesn't already exist.
+Creates a Task Scheduler entry with:
+- Name: YouTube Music To iTunes Auto Sync
+- Trigger: At Log on + 45s delay
+- Action: auto_sync.bat in same folder
+- User-specific (no admin needed)
+- Runs only when user is logged on
+- AC power + network required
+#>
+
+# -----------------------------
+# PATHS
+# -----------------------------
+$basePath = $scriptDir
+$batFile = Join-Path $basePath "auto_sync.bat"
+$taskName = "YouTube Music To iTunes Auto Syncer"
+
+if (-not (Test-Path $batFile)) {
+    Write-Host "ERROR: auto_sync.bat not found in: $basePath"
+    exit 1
+}
+
+try {
+    $existingTask = Get-ScheduledTask -TaskName $taskName -ErrorAction Stop
+    Write-Host "Task '$taskName' already exists. Skipping creation."
+    exit
+}catch {
+    # Task does not exist → continue and create it
+	Write-Host "Task '$taskName' doesnt exists going to create it"
+}
+
+# -----------------------------
+# GENERAL TAB
+# -----------------------------
+
+$currentUser = "$env:USERDOMAIN\$env:USERNAME"
+
+$principal = New-ScheduledTaskPrincipal `
+    -UserId $currentUser `
+    -LogonType Interactive `  # ← Run only when user is logged on
+
+# Configure for detected Windows version
+$os = (Get-CimInstance Win32_OperatingSystem).Caption
+$settings = New-ScheduledTaskSettingsSet -Compatibility Win7 -ExecutionTimeLimit (New-TimeSpan -Hours 4) # Win7+ compatibility
+
+# -----------------------------
+# TRIGGER TAB
+# -----------------------------
+# Workstation unlock trigger
+$trigger = New-ScheduledTaskTrigger -AtLogOn -User $currentUser
+
+# Delay for 45 seconds
+$trigger.Delay = "PT45S"    # ISO 8601 format
+
+$trigger.Enabled = $true
+
+
+# -----------------------------
+# ACTION TAB
+# -----------------------------
+$action = New-ScheduledTaskAction `
+    -Execute $batFile
+
+# -----------------------------
+# CONDITION TAB
+# -----------------------------
+# Uncheck all conditions first, then apply specific ones
+$settings.StopIfGoingOnBatteries = $false
+$settings.DisallowStartIfOnBatteries = $true            # Start only on AC power
+$settings.RunOnlyIfNetworkAvailable = $true             # Require network
+
+# -----------------------------
+# BUILD TASK
+# -----------------------------
+$task = New-ScheduledTask `
+    -Action $action `
+    -Principal $principal `
+    -Trigger $trigger `
+    -Settings $settings
+
+# -----------------------------
+# REGISTER TASK
+# -----------------------------
+Register-ScheduledTask `
+    -TaskName $taskName `
+    -InputObject $task `
+    -Force
+	
+
+
+
+Write-Host "`nTask '$taskName' created successfully for $currentUser!"
+
+
 Write-Host "`nSetup complete. All required tools are installed and ready." -ForegroundColor Green
+
 exit
