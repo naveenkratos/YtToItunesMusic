@@ -10,9 +10,9 @@ Steps to follow:
 4. For Creating Auto Sync Youtube to itunes Playlist Follow below.  
 &emsp;1. Open Task Scheduler,  
 &emsp;2. In Left side pane, click on Task Schedule Library,  
-&emsp;3. Scroll and Check If 'YouTube Music To iTunes Auto Sync' task already exists or not,
+&emsp;3. Scroll and Check If 'YouTube Music To iTunes Auto Syncer' task already exists or not,
  
-&emsp;If **'YouTube Music To iTunes Auto Sync' task not exists**, Then follow below,  
+&emsp;If **'YouTube Music To iTunes Auto Syncer' task not exists**, Then follow below,  
 &emsp;&emsp;1. Click Create Task and follow below, **"Note: Don't click create basic task"**  
 &emsp;&emsp;2. In General Tab,  
      &emsp;&emsp;&emsp;&emsp;Give name as 'YouTube Music To iTunes Auto Sync'  
@@ -34,7 +34,7 @@ Steps to follow:
      &emsp;&emsp;&emsp;&emsp;Tick "start only if network connection is available"  and  
      &emsp;&emsp;&emsp;&emsp;Tick "Any available network"  
  
-&emsp;If **'YouTube Music To iTunes Auto Sync' task already exists**, Then follow below,  
+&emsp;If **'YouTube Music To iTunes Auto Syncer' task already exists**, Then follow below,  
 &emsp;&emsp;1. Right Click 'YouTube Music To iTunes Auto Sync' Task and click properties  
 &emsp;&emsp;2. In Trigger tab, Click Edit,  
 &emsp;&emsp;&emsp;&emsp; Change "At Log On" to "On Workstation unlock"  
