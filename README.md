@@ -37,11 +37,16 @@ Steps to follow:
 &emsp;If **'YouTube Music To iTunes Auto Sync' task already exists**, Then follow below,  
 &emsp;&emsp;1. Right Click 'YouTube Music To iTunes Auto Sync' Task and click properties  
 &emsp;&emsp;2. In Trigger tab, Click Edit,  
-&emsp;&emsp;3. Change "At Log On" to "On Workstation unlock"  
-&emsp;&emsp;4. Select "on workstation unlock"  
-&emsp;&emsp;5. Tick specific user  
-&emsp;&emsp;6. Tick delay task and select seconds and then edit it to 45 seconds  
-&emsp;&emsp;7. Tick enabled  
+&emsp;&emsp;&emsp;&emsp; Change "At Log On" to "On Workstation unlock"  
+&emsp;&emsp;&emsp;&emsp; Select "on workstation unlock"  
+&emsp;&emsp;&emsp;&emsp; Tick specific user  
+&emsp;&emsp;&emsp;&emsp; Tick delay task and select seconds and then edit it to 45 seconds  
+&emsp;&emsp;&emsp;&emsp; Tick enabled  
+&emsp;&emsp;3. In condition Tab, Click Edit,  
+     &emsp;&emsp;&emsp;&emsp;UnTick all  
+     &emsp;&emsp;&emsp;&emsp;Tick "Start Task only when computer is on AC Power" and  
+     &emsp;&emsp;&emsp;&emsp;Tick "start only if network connection is available"  and  
+     &emsp;&emsp;&emsp;&emsp;Tick "Any available network"  
 
 By following above instructions, your youtube playlist will be in sync with your itunes playlist.   
 EveryTime your open your laptop the YT -> iTunes playlist starts syncing.   
