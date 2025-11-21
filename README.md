@@ -1,4 +1,4 @@
-**Sync Youtube to Itunes Playlist for IPHONE OFFLINE SONGS**
+**Download and Sync Youtube Playlists to Itunes Playlists for IPHONE/IPAD OFFLINE SONGS**
   
 **Mandatory: Install itunes from microsoft store.**
   
