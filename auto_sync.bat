@@ -68,16 +68,12 @@ echo ===================================================== >> "%LOGFILE%"
 
 yt-dlp -U >> "%LOGFILE%" 2>&1
 
-echo ===================================================== >> "%LOGFILE%"
-echo [%date% %time%] Starting YouTube to iTunes Sync >> "%LOGFILE%"
-echo ===================================================== >> "%LOGFILE%"
-
 
 :: Loop youtube playlist url in config files
 for /f "usebackq tokens=1,* delims==" %%A in (`findstr /v "^#" "%CONFIG_FILE%"`) do (
     
 	echo =====================================================  >> "%LOGFILE%"
-	echo    Starting YouTube Playlist Sync  >> "%LOGFILE%"
+	echo    Downloading YouTube Playlist Songs  >> "%LOGFILE%"
 	echo =====================================================  >> "%LOGFILE%"
 	echo Playlist %%A: %%B  >> "%LOGFILE%"
 	echo Target Folder: %ITUNESMUSIC%  >> "%LOGFILE%"
@@ -92,14 +88,15 @@ for /f "usebackq tokens=1,* delims==" %%A in (`findstr /v "^#" "%CONFIG_FILE%"`)
 	-o "%ITUNESMUSIC%\%%(title)s.%%(ext)s" ^
 	%%B  >> "%LOGFILE%" 2>&1
 
-	:: --- Trigger iTunes refresh + reorder playlist ---
-	powershell -ExecutionPolicy Bypass -File "%BASEDIR%\itunes_playlist.ps1" %%B >> "%LOGFILE%" 2>&1
-
-
-	echo ----------------------------------------------------- >> "%LOGFILE%"
-	echo   Playlist Sync complete! >> "%LOGFILE%"
-	echo ----------------------------------------------------- >> "%LOGFILE%"
 )
+
+echo ===================================================== >> "%LOGFILE%"
+echo [%date% %time%] Starting YouTube to iTunes Sync >> "%LOGFILE%"
+echo ===================================================== >> "%LOGFILE%"
+
+:: --- Trigger iTunes refresh + reorder playlist ---
+powershell -ExecutionPolicy Bypass -File "%BASEDIR%\itunes_playlist.ps1" >> "%LOGFILE%" 2>&1
+
 echo ===================================================== >> "%LOGFILE%"
 echo [%date% %time%] YouTube to iTunes Sync Complete!  >> "%LOGFILE%"
 echo ===================================================== >> "%LOGFILE%"
